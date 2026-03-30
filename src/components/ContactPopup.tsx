@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ContactPopupProps {
   phone: string;
@@ -6,9 +7,22 @@ interface ContactPopupProps {
   telegramUrl: string;
 }
 
+const SERVICES = [
+  "Нужна консультация",
+  "Расклад на будущее",
+  "Помощь в отношениях",
+  "Диагностика на порчу, сглаз",
+  "Другая услуга",
+];
+
 const ContactPopup = ({ phone, whatsappUrl, telegramUrl }: ContactPopupProps) => {
   const [isSmallVisible, setIsSmallVisible] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [userPhone, setUserPhone] = useState("");
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -20,31 +34,50 @@ const ContactPopup = ({ phone, whatsappUrl, telegramUrl }: ContactPopupProps) =>
     };
   }, []);
 
+  const toggleService = (service: string) => {
+    setSelectedServices((prev) =>
+      prev.includes(service) ? prev.filter((s) => s !== service) : [...prev, service]
+    );
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !userPhone.trim()) return;
+    setSending(true);
+    try {
+      const { error } = await supabase.functions.invoke("send-telegram", {
+        body: { name: name.trim(), phone: userPhone.trim(), services: selectedServices },
+      });
+      if (error) throw error;
+      setSent(true);
+      setTimeout(() => {
+        setIsModalOpen(false);
+        setSent(false);
+        setName("");
+        setUserPhone("");
+        setSelectedServices([]);
+      }, 3000);
+    } catch (err) {
+      console.error("Failed to send:", err);
+    } finally {
+      setSending(false);
+    }
+  };
+
   return (
     <>
-      {/* Small popup */}
       {isSmallVisible && !isModalOpen && (
         <div className="fixed bottom-24 right-6 z-50 animate-fade-in">
           <div
             className="bg-black/80 backdrop-blur-md border border-gold/30 rounded-2xl p-4 flex items-center gap-3 cursor-pointer shadow-lg shadow-black/50 hover:border-gold/50 transition-all max-w-[280px]"
-            onClick={() => {
-              setIsSmallVisible(false);
-              setIsModalOpen(true);
-            }}
+            onClick={() => { setIsSmallVisible(false); setIsModalOpen(true); }}
           >
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsSmallVisible(false);
-              }}
+              onClick={(e) => { e.stopPropagation(); setIsSmallVisible(false); }}
               className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-black/80 border border-gold/30 text-gold/60 hover:text-gold text-xs flex items-center justify-center"
-            >
-              ×
-            </button>
+            >×</button>
             <div className="relative flex-shrink-0">
-              <div className="w-12 h-12 rounded-full bg-gold/20 flex items-center justify-center text-gold font-cormorant text-lg font-bold">
-                НИ
-              </div>
+              <div className="w-12 h-12 rounded-full bg-gold/20 flex items-center justify-center text-gold font-cormorant text-lg font-bold">НИ</div>
               <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-black animate-pulse" />
             </div>
             <div>
@@ -55,7 +88,6 @@ const ContactPopup = ({ phone, whatsappUrl, telegramUrl }: ContactPopupProps) =>
         </div>
       )}
 
-      {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={() => setIsModalOpen(false)}>
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
@@ -63,12 +95,7 @@ const ContactPopup = ({ phone, whatsappUrl, telegramUrl }: ContactPopupProps) =>
             className="relative bg-[hsl(0,0%,10%)] border border-gold/30 rounded-3xl p-8 w-full max-w-md animate-scale-in shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="absolute top-4 right-4 text-gold/60 hover:text-gold text-2xl"
-            >
-              ×
-            </button>
+            <button onClick={() => setIsModalOpen(false)} className="absolute top-4 right-4 text-gold/60 hover:text-gold text-2xl">×</button>
 
             <h3 className="font-cormorant text-2xl text-gold text-center mb-6">СВЯЖИТЕСЬ СО МНОЙ</h3>
 
@@ -90,38 +117,47 @@ const ContactPopup = ({ phone, whatsappUrl, telegramUrl }: ContactPopupProps) =>
               </a>
             </div>
 
-            <p className="text-foreground/60 text-center text-sm mb-5">
-              Чтобы я могла Вам помочь, отметьте услугу и укажите имя и номер телефона.
-            </p>
-
-            <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); }}>
-              <input
-                type="text"
-                placeholder="Имя"
-                className="w-full bg-white/5 border border-gold/20 rounded-xl px-4 py-3 text-foreground placeholder:text-foreground/30 focus:outline-none focus:border-gold/50 transition"
-              />
-              <input
-                type="tel"
-                placeholder="Введите свой номер"
-                className="w-full bg-white/5 border border-gold/20 rounded-xl px-4 py-3 text-foreground placeholder:text-foreground/30 focus:outline-none focus:border-gold/50 transition"
-              />
-
-              <div className="space-y-2 py-2">
-                {["Нужна консультация", "Расклад на будущее", "Помощь в отношениях", "Диагностика на порчу, сглаз", "Другая услуга"].map((service) => (
-                  <label key={service} className="flex items-center gap-3 cursor-pointer group">
-                    <input type="checkbox" className="w-4 h-4 rounded border-gold/30 bg-transparent accent-gold" />
-                    <span className="text-foreground/70 text-sm group-hover:text-foreground transition">{service}</span>
-                  </label>
-                ))}
+            {sent ? (
+              <div className="text-center py-8">
+                <p className="text-green-400 text-lg font-cormorant">✓ Заявка отправлена!</p>
+                <p className="text-foreground/50 text-sm mt-2">Я свяжусь с вами в ближайшее время</p>
               </div>
-
-              <button
-                type="submit"
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-[hsl(43,70%,35%)] to-[hsl(43,80%,50%)] text-black font-medium hover:opacity-90 transition shadow-lg shadow-[hsl(43,76%,49%)]/20"
-              >
-                Отправить заявку
-              </button>
-            </form>
+            ) : (
+              <>
+                <p className="text-foreground/60 text-center text-sm mb-5">
+                  Чтобы я могла Вам помочь, отметьте услугу и укажите имя и номер телефона.
+                </p>
+                <form className="space-y-3" onSubmit={handleSubmit}>
+                  <input
+                    type="text" placeholder="Имя" value={name} onChange={(e) => setName(e.target.value)} required
+                    className="w-full bg-white/5 border border-gold/20 rounded-xl px-4 py-3 text-foreground placeholder:text-foreground/30 focus:outline-none focus:border-gold/50 transition"
+                  />
+                  <input
+                    type="tel" placeholder="Введите свой номер" value={userPhone} onChange={(e) => setUserPhone(e.target.value)} required
+                    className="w-full bg-white/5 border border-gold/20 rounded-xl px-4 py-3 text-foreground placeholder:text-foreground/30 focus:outline-none focus:border-gold/50 transition"
+                  />
+                  <div className="space-y-2 py-2">
+                    {SERVICES.map((service) => (
+                      <label key={service} className="flex items-center gap-3 cursor-pointer group">
+                        <input
+                          type="checkbox"
+                          checked={selectedServices.includes(service)}
+                          onChange={() => toggleService(service)}
+                          className="w-4 h-4 rounded border-gold/30 bg-transparent accent-gold"
+                        />
+                        <span className="text-foreground/70 text-sm group-hover:text-foreground transition">{service}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <button
+                    type="submit" disabled={sending}
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-[hsl(43,70%,35%)] to-[hsl(43,80%,50%)] text-black font-medium hover:opacity-90 transition shadow-lg shadow-[hsl(43,76%,49%)]/20 disabled:opacity-50"
+                  >
+                    {sending ? "Отправка..." : "Отправить заявку"}
+                  </button>
+                </form>
+              </>
+            )}
           </div>
         </div>
       )}

@@ -21,7 +21,6 @@ const Index = () => {
     <div className="min-h-screen overflow-x-hidden">
       <div className="background-gradient" />
       <NeuralCanvas />
-      <GoldenBlob />
       <div className="relative z-10">
         <HeroSection />
         <TvShowSection />

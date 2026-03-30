@@ -1,5 +1,4 @@
 import NeuralCanvas from "@/components/NeuralCanvas";
-import GoldenBlob from "@/components/GoldenBlob";
 import ContactPopup from "@/components/ContactPopup";
 import HeroSection from "@/components/sections/HeroSection";
 import ServicesPreview from "@/components/sections/ServicesPreview";
@@ -22,7 +21,6 @@ const Index = () => {
     <div className="min-h-screen overflow-x-hidden">
       <div className="background-gradient" />
       <NeuralCanvas />
-      <GoldenBlob />
       <div className="relative z-10">
         <HeroSection />
         <TvShowSection />

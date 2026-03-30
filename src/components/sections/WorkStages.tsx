@@ -1,5 +1,3 @@
-import { motion } from "framer-motion";
-
 const stages = [
   {
     num: "1",
@@ -44,31 +42,23 @@ const WorkStages = () => {
   return (
     <section className="py-20 px-4">
       <div className="max-w-4xl mx-auto">
-        <motion.h2
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="font-cormorant text-3xl md:text-5xl text-gold text-center mb-4"
-        >
+        <h2 className="font-cormorant text-3xl md:text-5xl gold-gradient-text text-center mb-4 scroll-blur">
           Этапы работы
-        </motion.h2>
-        <p className="text-center text-foreground/60 mb-16">Как происходит наша совместная работа</p>
+        </h2>
+        <p className="text-center text-foreground/60 mb-16 scroll-fade-up">Как происходит наша совместная работа</p>
 
-        <div className="space-y-16">
+        <div className="space-y-12">
           {stages.map((stage, i) => (
-            <motion.div
+            <div
               key={i}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.2 }}
-              className="flex gap-6 md:gap-10"
+              className="glass-card p-6 md:p-8 flex gap-6 md:gap-10 scroll-bounce-left"
+              style={{ transitionDelay: `${i * 0.2}s` }}
             >
               <div className="flex-shrink-0">
-                <span className="font-cormorant text-5xl md:text-7xl text-gold/30 font-bold">{stage.num}</span>
+                <span className="font-cormorant text-5xl md:text-7xl gold-gradient-text-light font-bold opacity-50">{stage.num}</span>
               </div>
               <div>
-                <h3 className="font-cormorant text-2xl md:text-3xl text-gold mb-2">{stage.title}</h3>
+                <h3 className="font-cormorant text-2xl md:text-3xl gold-gradient-text-light mb-2">{stage.title}</h3>
                 <p className="text-gold/60 text-sm mb-4">{stage.subtitle}</p>
                 {stage.content.map((p, j) => (
                   <p key={j} className="text-foreground/70 text-sm mb-3">{p}</p>
@@ -76,7 +66,9 @@ const WorkStages = () => {
                 {stage.list && (
                   <ul className="mt-3 space-y-1">
                     {stage.list.map((item, j) => (
-                      <li key={j} className="text-foreground/60 text-sm">— {item}</li>
+                      <li key={j} className="text-foreground/60 text-sm flex gap-2">
+                        <span className="text-gold">—</span>{item}
+                      </li>
                     ))}
                   </ul>
                 )}
@@ -84,12 +76,12 @@ const WorkStages = () => {
                   <p className="text-foreground/50 text-sm mt-4 whitespace-pre-line">{stage.extra}</p>
                 )}
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
-        <div className="mt-16 border border-gold/15 p-8 text-center space-y-3">
-          <h3 className="font-cormorant text-2xl text-gold">Стоимость услуг</h3>
+        <div className="mt-16 glass-card-bordered p-8 text-center space-y-3 scroll-fade-up">
+          <h3 className="font-cormorant text-2xl gold-gradient-text-light">Стоимость услуг</h3>
           <p className="text-foreground/60 text-sm">Моя работа является платной, так как каждый обряд требует времени, силы и глубокого энергетического вложения.</p>
           <p className="text-foreground/60 text-sm">Цена зависит от сложности ситуации, выбранных ритуалов и их количества.</p>
           <p className="text-foreground/60 text-sm">Перед началом работы я всегда озвучиваю стоимость за работу и нужные материалы.</p>

@@ -23,6 +23,7 @@ const Index = () => {
       <NeuralCanvas />
       <div className="relative z-10">
         <HeroSection />
+        <TvShowSection />
         <ServicesPreview />
         <MarqueeBanner text="УСЛУГИ" />
         <ServicesDetail />
@@ -36,7 +37,6 @@ const Index = () => {
         <Reviews />
         <AboutSection />
       </div>
-      <FloatingWhatsApp />
       <ContactPopup
         phone="+79045890444"
         whatsappUrl="https://wa.me/79045890444"

@@ -47,9 +47,14 @@
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-family: 'Raleway', sans-serif;
+    overflow-x: hidden;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -75,6 +80,51 @@
   }
 }
 
+/* Gold gradient text */
+.gold-gradient-text {
+  color: #FF8500;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-color: transparent;
+  background-image: linear-gradient(
+    90deg,
+    rgba(171,146,67,1) -10%,
+    rgba(214,195,102,1) 2%,
+    rgba(255,250,147,1) 16%,
+    rgba(223,202,101,1) 33%,
+    rgba(199,164,70,1) 49%,
+    rgba(200,167,76,1) 65%,
+    rgba(243,238,133,1) 83%,
+    rgba(196,161,72,1) 98%,
+    rgba(202,166,77,1) 110%
+  );
+  filter: drop-shadow(1px 1px #000);
+}
+
+.gold-gradient-text-light {
+  color: #FF8500;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-image: linear-gradient(
+    173deg,
+    rgba(226,166,72,1) 20%,
+    rgba(255,255,180,1) 50%,
+    rgba(226,166,72,1) 80%
+  );
+  filter: drop-shadow(1px 2px #000);
+}
+
+/* Background gradient */
+.background-gradient {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(ellipse at 50% 0%, rgba(43, 33, 15, 0.5) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 50%, rgba(43, 33, 15, 0.2) 0%, transparent 50%),
+              radial-gradient(ellipse at 20% 80%, rgba(43, 33, 15, 0.15) 0%, transparent 50%),
+              hsl(0, 0%, 7%);
+}
+
 /* Marquee animation */
 @keyframes marquee {
   0% { transform: translateX(0); }
@@ -85,7 +135,85 @@
   animation: marquee 20s linear infinite;
 }
 
-/* Gold decorative border */
+/* Scroll animations */
+.scroll-fade-up {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s ease-out;
+}
+.scroll-fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.scroll-fade {
+  opacity: 0;
+  transition: all 0.8s ease-out;
+}
+.scroll-fade.visible {
+  opacity: 1;
+}
+
+.scroll-bounce-left {
+  opacity: 0;
+  transform: translateX(-60px);
+  transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+.scroll-bounce-left.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.scroll-bounce-right {
+  opacity: 0;
+  transform: translateX(60px);
+  transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+.scroll-bounce-right.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.scroll-blur {
+  opacity: 0;
+  filter: blur(15px);
+  transform: scale(1.2);
+  transition: all 1s ease-out;
+}
+.scroll-blur.visible {
+  opacity: 1;
+  filter: blur(0);
+  transform: scale(1);
+}
+
+.scroll-scale {
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.7s ease-out;
+}
+.scroll-scale.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Gold glow pulse on buttons/cards */
+.gold-glow {
+  animation: gold-glow 2s infinite;
+}
+@keyframes gold-glow {
+  0% { box-shadow: 0 0 10px 1px rgba(255, 221, 105, 0.3); }
+  50% { box-shadow: 0 0 30px 5px rgba(255, 221, 105, 0.3); }
+  100% { box-shadow: 0 0 10px 1px rgba(255, 221, 105, 0.3); }
+}
+
+/* Online pulse */
+@keyframes online-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5); transform: scale(1); }
+  70% { box-shadow: 0 0 0 5px rgba(37, 211, 102, 0); transform: scale(1.2); }
+  100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); transform: scale(1); }
+}
+
+/* Gold corner frame */
 .gold-border-frame {
   position: relative;
 }
@@ -93,8 +221,25 @@
   content: '';
   position: absolute;
   inset: 0;
-  border: 1px solid hsl(43, 76%, 49%, 0.3);
+  border: 1px solid hsl(43, 76%, 49%, 0.15);
   pointer-events: none;
+  border-radius: 2px;
+}
+
+/* Rounded card style */
+.glass-card {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(218, 192, 127, 0.15);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0px 0px 11px rgba(220,192,127,0.15    );
+}
+
+.glass-card-bordered {
+  background: rgba(46, 46, 46, 0.4);
+  border: 2px solid rgba(150, 120, 90, 0.5);
+  border-radius: 30px;
+  backdrop-filter: blur(10px);
 }
 
 /* Scrollbar styling */
@@ -107,4 +252,21 @@
 ::-webkit-scrollbar-thumb {
   background: hsl(43, 76%, 49%, 0.3);
   border-radius: 4px;
+}
+
+/* Fade in/out animations for contact popup etc */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out;
 }

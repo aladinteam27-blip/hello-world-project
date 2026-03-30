@@ -1,16 +1,35 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import HeroSection from "@/components/sections/HeroSection";
+import ServicesPreview from "@/components/sections/ServicesPreview";
+import MarqueeBanner from "@/components/sections/MarqueeBanner";
+import ServicesDetail from "@/components/sections/ServicesDetail";
+import WorkStages from "@/components/sections/WorkStages";
+import Predictions from "@/components/sections/Predictions";
+import LoveSection from "@/components/sections/LoveSection";
+import NegativeSection from "@/components/sections/NegativeSection";
+import ContactCTA from "@/components/sections/ContactCTA";
+import Reviews from "@/components/sections/Reviews";
+import AboutSection from "@/components/sections/AboutSection";
+import FloatingWhatsApp from "@/components/sections/FloatingWhatsApp";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
+    <div className="min-h-screen bg-background overflow-x-hidden">
+      <HeroSection />
+      <ServicesPreview />
+      <MarqueeBanner text="УСЛУГИ" />
+      <ServicesDetail />
+      <WorkStages />
+      <Predictions />
+      <MarqueeBanner text="ЛЮБОВЬ. СЕМЬЯ. ОТНОШЕНИЯ" />
+      <LoveSection />
+      <NegativeSection />
+      <ContactCTA />
+      <MarqueeBanner text="ОТЗЫВЫ" />
+      <Reviews />
+      <AboutSection />
+      <FloatingWhatsApp />
     </div>
   );
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;

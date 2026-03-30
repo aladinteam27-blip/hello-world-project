@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import servicesBg from "@/assets/services-bg.jpg";
 
 const categories = [
@@ -53,30 +52,22 @@ const ServicesDetail = () => {
   return (
     <section className="py-20 px-4 relative" id="services">
       <div 
-        className="absolute inset-0 opacity-10 bg-cover bg-center"
+        className="absolute inset-0 opacity-5 bg-cover bg-center"
         style={{ backgroundImage: `url(${servicesBg})` }}
       />
       <div className="relative max-w-5xl mx-auto">
-        <motion.h2
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="font-cormorant text-3xl md:text-5xl text-gold text-center mb-4 lowercase"
-        >
+        <h2 className="font-cormorant text-3xl md:text-5xl gold-gradient-text text-center mb-4 lowercase scroll-blur">
           услуги
-        </motion.h2>
+        </h2>
 
-        <div className="grid md:grid-cols-2 gap-10 mt-12">
+        <div className="grid md:grid-cols-2 gap-6 mt-12">
           {categories.map((cat, i) => (
-            <motion.div
+            <div
               key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.15 }}
-              className="border border-gold/10 p-6"
+              className={`glass-card p-6 scroll-fade-up`}
+              style={{ transitionDelay: `${i * 0.15}s` }}
             >
-              <h3 className="font-cormorant text-2xl text-gold mb-4">{cat.title}</h3>
+              <h3 className="font-cormorant text-2xl gold-gradient-text-light mb-4">{cat.title}</h3>
               <ul className="space-y-2">
                 {cat.items.map((item, j) => (
                   <li key={j} className="text-foreground/70 text-sm flex items-start gap-2">
@@ -85,7 +76,7 @@ const ServicesDetail = () => {
                   </li>
                 ))}
               </ul>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { useState } from "react";
 
 const reviews = [
@@ -25,24 +24,16 @@ const Reviews = () => {
   return (
     <section className="py-20 px-4" id="reviews">
       <div className="max-w-5xl mx-auto">
-        <motion.h2
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="font-cormorant text-3xl md:text-5xl text-gold text-center mb-12"
-        >
+        <h2 className="font-cormorant text-3xl md:text-5xl gold-gradient-text text-center mb-12 scroll-blur">
           ОТЗЫВЫ
-        </motion.h2>
+        </h2>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {reviews.map((review, i) => (
-            <motion.div
+            <div
               key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: (i % 6) * 0.08 }}
-              className="border border-gold/10 p-6 hover:border-gold/25 transition-colors"
+              className="glass-card p-6 hover:border-gold/30 transition-all scroll-fade-up"
+              style={{ transitionDelay: `${(i % 6) * 0.08}s` }}
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-full bg-gold/20 flex items-center justify-center">
@@ -60,7 +51,7 @@ const Reviews = () => {
               >
                 {likes[i] ? '❤️' : '🤍'} Вам понравился данный отзыв?
               </button>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

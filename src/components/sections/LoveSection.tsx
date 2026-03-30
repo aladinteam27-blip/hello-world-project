@@ -1,19 +1,11 @@
-import { motion } from "framer-motion";
-
 const LoveSection = () => {
   return (
     <section className="py-20 px-4">
-      <div className="max-w-4xl mx-auto space-y-16">
-        {/* Return of loved one */}
-        <div>
-          <motion.h2
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="font-cormorant text-2xl md:text-4xl text-gold mb-6"
-          >
+      <div className="max-w-4xl mx-auto space-y-12">
+        <div className="glass-card p-8 md:p-10 scroll-bounce-right">
+          <h2 className="font-cormorant text-2xl md:text-4xl gold-gradient-text mb-6">
             Помощь в возвращении любимого человека
-          </motion.h2>
+          </h2>
           <p className="text-foreground/70 text-sm mb-4">Помогаю восстановить любовь и вернуть утраченную связь, если вы столкнулись с:</p>
           <ul className="space-y-2 mb-6">
             {[
@@ -34,9 +26,8 @@ const LoveSection = () => {
           <p className="text-foreground/60 text-sm">Если между близкими появились недопонимание, отдаление или постоянные споры, я направляю энергию на укрепление союза, возвращение доверия и тепла.</p>
         </div>
 
-        {/* Attracting love */}
-        <div>
-          <h3 className="font-cormorant text-2xl md:text-3xl text-gold mb-4">Привлечение любви и улучшение личной жизни</h3>
+        <div className="glass-card p-8 md:p-10 scroll-bounce-left">
+          <h3 className="font-cormorant text-2xl md:text-3xl gold-gradient-text-light mb-4">Привлечение любви и улучшение личной жизни</h3>
           <p className="text-foreground/60 text-sm mb-3">Делаю сильные обряды на любовь, взаимность, привязку и открытие сердечного потока, помогая человеку встретить свою судьбу или улучшить существующие отношения.</p>
           <p className="text-foreground/60 text-sm">Смотрю, какие препятствия мешают найти партнёра. Помогаю привлечь чувства и взаимное притяжение.</p>
         </div>

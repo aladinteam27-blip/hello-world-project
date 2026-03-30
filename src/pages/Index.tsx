@@ -1,5 +1,4 @@
 import NeuralCanvas from "@/components/NeuralCanvas";
-import GoldenBlob from "@/components/GoldenBlob";
 import ContactPopup from "@/components/ContactPopup";
 import HeroSection from "@/components/sections/HeroSection";
 import ServicesPreview from "@/components/sections/ServicesPreview";

@@ -11,7 +11,7 @@ import NegativeSection from "@/components/sections/NegativeSection";
 import ContactCTA from "@/components/sections/ContactCTA";
 import Reviews from "@/components/sections/Reviews";
 import AboutSection from "@/components/sections/AboutSection";
-import FloatingWhatsApp from "@/components/sections/FloatingWhatsApp";
+import TvShowSection from "@/components/sections/TvShowSection";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
 const Index = () => {

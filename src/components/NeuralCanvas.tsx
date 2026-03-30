@@ -1,5 +1,67 @@
 import { useEffect, useRef } from "react";
 
+const vertShaderSource = `
+  precision mediump float;
+  varying vec2 vUv;
+  attribute vec2 a_position;
+  void main() {
+    vUv = .5 * (a_position + 1.);
+    gl_Position = vec4(a_position, 0.0, 1.0);
+  }
+`;
+
+const fragShaderSource = `
+  precision mediump float;
+  varying vec2 vUv;
+  uniform float u_time;
+  uniform float u_ratio;
+  uniform vec2 u_pointer_position;
+  uniform float u_scroll_progress;
+
+  vec2 rotate(vec2 uv, float th) {
+    return mat2(cos(th), sin(th), -sin(th), cos(th)) * uv;
+  }
+
+  float neuro_shape(vec2 uv, float t, float p) {
+    vec2 sine_acc = vec2(0.);
+    vec2 res = vec2(0.);
+    float scale = 9.;
+    for (int j = 0; j < 15; j++) {
+      uv = rotate(uv, 1.);
+      sine_acc = rotate(sine_acc, 1.);
+      vec2 layer = uv * scale + float(j) + sine_acc - t;
+      sine_acc += sin(layer);
+      res += (.5 + .5 * cos(layer)) / scale;
+      scale *= (1.2 - .07 * p);
+    }
+    return res.x + res.y;
+  }
+
+  void main() {
+    vec2 uv = .5 * vUv;
+    uv.x *= u_ratio;
+
+    vec2 pointer = vUv - u_pointer_position;
+    pointer.x *= u_ratio;
+    float p = clamp(length(pointer), 0., 1.);
+    p = .5 * pow(1. - p, 2.);
+
+    float t = .001 * u_time;
+    vec3 color = vec3(0.);
+
+    float noise = neuro_shape(uv, t, p);
+    noise = 1.2 * pow(noise, 3.);
+    noise += pow(noise, 10.);
+    noise = max(.0, noise - .5);
+    noise *= (1. - length(vUv - .5));
+
+    color = normalize(vec3(.9, .9, .3));
+    color = color * noise;
+
+    gl_FragColor = vec4(color, noise);
+  }
+`;
+
 const NeuralCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -7,88 +69,110 @@ const NeuralCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
+    const dpr = Math.min(window.devicePixelRatio, 2);
+    const pointer = { x: 0, y: 0, tX: 0, tY: 0 };
     let animationId: number;
-    let particles: Array<{
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      size: number;
-      opacity: number;
-    }> = [];
 
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = document.documentElement.scrollHeight;
-    };
+    const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl") as WebGLRenderingContext | null;
+    if (!gl) return;
 
-    const initParticles = () => {
-      const count = Math.floor((canvas.width * canvas.height) / 25000);
-      particles = Array.from({ length: Math.min(count, 120) }, () => ({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        size: Math.random() * 1.5 + 0.5,
-        opacity: Math.random() * 0.5 + 0.1,
-      }));
-    };
+    const glCtx = gl as WebGLRenderingContext;
 
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      particles.forEach((p) => {
-        p.x += p.vx;
-        p.y += p.vy;
-
-        if (p.x < 0) p.x = canvas.width;
-        if (p.x > canvas.width) p.x = 0;
-        if (p.y < 0) p.y = canvas.height;
-        if (p.y > canvas.height) p.y = 0;
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(218, 192, 127, ${p.opacity})`;
-        ctx.fill();
-      });
-
-      // Draw connections
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-
-          if (dist < 150) {
-            ctx.beginPath();
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(218, 192, 127, ${0.06 * (1 - dist / 150)})`;
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-          }
-        }
+    function createShader(source: string, type: number) {
+      const shader = glCtx.createShader(type);
+      if (!shader) return null;
+      glCtx.shaderSource(shader, source);
+      glCtx.compileShader(shader);
+      if (!glCtx.getShaderParameter(shader, glCtx.COMPILE_STATUS)) {
+        console.error(glCtx.getShaderInfoLog(shader));
+        glCtx.deleteShader(shader);
+        return null;
       }
+      return shader;
+    }
 
-      animationId = requestAnimationFrame(draw);
-    };
+    const vertexShader = createShader(vertShaderSource, glCtx.VERTEX_SHADER);
+    const fragmentShader = createShader(fragShaderSource, glCtx.FRAGMENT_SHADER);
+    if (!vertexShader || !fragmentShader) return;
+
+    const program = glCtx.createProgram();
+    if (!program) return;
+    glCtx.attachShader(program, vertexShader);
+    glCtx.attachShader(program, fragmentShader);
+    glCtx.linkProgram(program);
+
+    if (!glCtx.getProgramParameter(program, glCtx.LINK_STATUS)) {
+      console.error(glCtx.getProgramInfoLog(program));
+      return;
+    }
+
+    // Get uniforms
+    const uniforms: Record<string, WebGLUniformLocation | null> = {};
+    const uniformCount = glCtx.getProgramParameter(program, glCtx.ACTIVE_UNIFORMS);
+    for (let i = 0; i < uniformCount; i++) {
+      const info = glCtx.getActiveUniform(program, i);
+      if (info) {
+        uniforms[info.name] = glCtx.getUniformLocation(program, info.name);
+      }
+    }
+
+    // Setup geometry
+    const vertices = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]);
+    const buffer = glCtx.createBuffer();
+    glCtx.bindBuffer(glCtx.ARRAY_BUFFER, buffer);
+    glCtx.bufferData(glCtx.ARRAY_BUFFER, vertices, glCtx.STATIC_DRAW);
+    glCtx.useProgram(program);
+
+    const posLoc = glCtx.getAttribLocation(program, "a_position");
+    glCtx.enableVertexAttribArray(posLoc);
+    glCtx.vertexAttribPointer(posLoc, 2, glCtx.FLOAT, false, 0, 0);
+
+    function resize() {
+      canvas!.width = window.innerWidth * dpr;
+      canvas!.height = window.innerHeight * dpr;
+      glCtx.uniform1f(uniforms.u_ratio, canvas!.width / canvas!.height);
+      glCtx.viewport(0, 0, canvas!.width, canvas!.height);
+    }
+
+    function render() {
+      pointer.x += (pointer.tX - pointer.x) * 0.5;
+      pointer.y += (pointer.tY - pointer.y) * 0.5;
+
+      glCtx.uniform1f(uniforms.u_time, performance.now());
+      glCtx.uniform2f(
+        uniforms.u_pointer_position,
+        pointer.x / window.innerWidth,
+        1 - pointer.y / window.innerHeight
+      );
+      glCtx.uniform1f(uniforms.u_scroll_progress, window.pageYOffset / (2 * window.innerHeight));
+      glCtx.drawArrays(glCtx.TRIANGLE_STRIP, 0, 4);
+
+      animationId = requestAnimationFrame(render);
+    }
+
+    function updateMouse(x: number, y: number) {
+      pointer.tX = x;
+      pointer.tY = y;
+    }
+
+    const onPointerMove = (e: PointerEvent) => updateMouse(e.clientX, e.clientY);
+    const onTouchMove = (e: TouchEvent) => updateMouse(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
+    const onClick = (e: MouseEvent) => updateMouse(e.clientX, e.clientY);
+
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("touchmove", onTouchMove);
+    window.addEventListener("click", onClick);
+    window.addEventListener("resize", resize);
 
     resize();
-    initParticles();
-    draw();
-
-    const resizeObserver = new ResizeObserver(() => {
-      resize();
-      initParticles();
-    });
-    resizeObserver.observe(document.body);
+    render();
 
     return () => {
       cancelAnimationFrame(animationId);
-      resizeObserver.disconnect();
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("click", onClick);
+      window.removeEventListener("resize", resize);
     };
   }, []);
 
@@ -96,7 +180,7 @@ const NeuralCanvas = () => {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-0"
-      style={{ opacity: 0.6 }}
+      style={{ opacity: 0.55 }}
     />
   );
 };

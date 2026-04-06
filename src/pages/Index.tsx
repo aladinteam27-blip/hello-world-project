@@ -12,6 +12,8 @@ import ContactCTA from "@/components/sections/ContactCTA";
 import Reviews from "@/components/sections/Reviews";
 import AboutSection from "@/components/sections/AboutSection";
 import TvShowSection from "@/components/sections/TvShowSection";
+import FooterSection from "@/components/sections/FooterSection";
+import FloatingContactBar from "@/components/sections/FloatingContactBar";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
 const Index = () => {
@@ -36,12 +38,14 @@ const Index = () => {
         <MarqueeBanner text="ОТЗЫВЫ" />
         <Reviews />
         <AboutSection />
+        <FooterSection />
       </div>
       <ContactPopup
         phone="+79045890444"
         whatsappUrl="https://wa.me/79045890444"
         telegramUrl="https://t.me/+79045890444"
       />
+      <FloatingContactBar />
     </div>
   );
 };
